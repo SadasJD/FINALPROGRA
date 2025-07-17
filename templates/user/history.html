@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}Historial - Sistema de Rutas del Ecuador{% endblock %}
+{% block page_title %}Mi Historial de Consultas{% endblock %}
+{% block breadcrumb %}Historial{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- Card de prueba simple -->
+            <div class="card card-primary">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-history"></i>
+                        Historial de Consultas
+                        {% if username %}
+                            - {{ username }}
+                        {% endif %}
+                    </h3>
+                    <div class="card-tools">
+                        {% if queries %}
+                            <span class="badge badge-info">{{ queries|length }} consultas</span>
+                        {% else %}
+                            <span class="badge badge-warning">0 consultas</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if queries and queries|length > 0 %}
+                        <!-- Tabla simple -->
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead class="bg-primary">
+                                    <tr>
+                                        <th style="width: 10px">#</th>
+                                        <th>Fecha</th>
+                                        <th>Origen</th>
+                                        <th>Destino</th>
+                                        <th>Distancia (km)</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for query in queries %}
+                                        <tr>
+                                            <td>{{ loop.index }}</td>
+                                            <td>
+                                                <small>{{ query.query_date.strftime('%d/%m/%Y %H:%M') }}</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-success">{{ query.start_city }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-danger">{{ query.end_city }}</span>
+                                            </td>
+                                            <td>
+                                                <strong>{{ query.total_distance }}</strong>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info" onclick="alert('Ruta: {{ query.get_route_as_list()|join(' - ') }}')">
+                                                    <i class="fas fa-route"></i> Ver
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <!-- Mensaje cuando no hay consultas -->
+                        <div class="callout callout-info">
+                            <h5><i class="fas fa-info-circle"></i> Sin consultas</h5>
+                            <p>No has realizado consultas de rutas aún. Ve al inicio para calcular tu primera ruta.</p>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('home.home') }}" class="btn btn-primary">
+                        <i class="fas fa-calculator"></i> Nueva Consulta
+                    </a>
+                    <a href="{{ url_for('user.statistics') }}" class="btn btn-info">
+                        <i class="fas fa-chart-bar"></i> Ver Estadísticas
+                    </a>
+                    <a href="/debug" class="btn btn-secondary">
+                        <i class="fas fa-bug"></i> Debug
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

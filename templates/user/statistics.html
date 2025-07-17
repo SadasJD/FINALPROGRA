@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+{% block title %}Estadísticas - Sistema de Rutas del Ecuador{% endblock %}
+{% block page_title %}Estadísticas del Sistema{% endblock %}
+{% block breadcrumb %}Estadísticas{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Estadísticas en tarjetas -->
+    <div class="row">
+        <div class="col-lg-3 col-6">
+            <!-- Total usuarios -->
+            <div class="small-box bg-info">
+                <div class="inner">
+                    <h3>{{ total_users }}</h3>
+                    <p>Total Usuarios</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-users"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-6">
+            <!-- Total consultas -->
+            <div class="small-box bg-success">
+                <div class="inner">
+                    <h3>{{ stats.total_queries }}</h3>
+                    <p>Total Consultas</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-search"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-6">
+            <!-- Distancia promedio -->
+            <div class="small-box bg-warning">
+                <div class="inner">
+                    <h3>{{ stats.average_distance }}</h3>
+                    <p>Distancia Promedio (km)</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-road"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-6">
+            <!-- Promedio por usuario -->
+            <div class="small-box bg-danger">
+                <div class="inner">
+                    <h3>
+                        {% if total_users > 0 %}
+                            {{ "%.1f"|format(stats.total_queries / total_users) }}
+                        {% else %}
+                            0
+                        {% endif %}
+                    </h3>
+                    <p>Promedio por Usuario</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-calculator"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Información de ciudades populares -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card card-primary">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-star"></i>
+                        Ciudades Más Populares
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="description-block border-right">
+                                <span class="description-percentage text-success">
+                                    <i class="fas fa-play"></i>
+                                </span>
+                                <h5 class="description-header">{{ stats.most_popular_start }}</h5>
+                                <span class="description-text">ORIGEN FAVORITO</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="description-block">
+                                <span class="description-percentage text-danger">
+                                    <i class="fas fa-flag-checkered"></i>
+                                </span>
+                                <h5 class="description-header">{{ stats.most_popular_end }}</h5>
+                                <span class="description-text">DESTINO FAVORITO</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-map"></i>
+                        Información del Sistema
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <strong><i class="fas fa-map-marked-alt mr-1"></i> Provincias</strong>
+                    <p class="text-muted">10 provincias del Ecuador incluidas</p>
+                    <hr>
+                    
+                    <strong><i class="fas fa-city mr-1"></i> Ciudades</strong>
+                    <p class="text-muted">Más de 40 ciudades principales</p>
+                    <hr>
+                    
+                    <strong><i class="fas fa-route mr-1"></i> Algoritmo</strong>
+                    <p class="text-muted">Dijkstra para rutas óptimas</p>
+                    <hr>
+                    
+                    <strong><i class="fas fa-database mr-1"></i> Base de Datos</strong>
+                    <p class="text-muted">SQLite con almacenamiento automático</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Lista de provincias -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card card-success collapsed-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-list"></i>
+                        Provincias y Ciudades Incluidas
+                    </h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body" style="display: none;">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h6><i class="fas fa-mountain text-primary"></i> Pichincha</h6>
+                            <ul class="list-unstyled ml-3">
+                                <li>• Quito</li>
+                                <li>• Cayambe</li>
+                                <li>• Sangolquí</li>
+                                <li>• Machachi</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-3">
+                            <h6><i class="fas fa-ship text-info"></i> Guayas</h6>
+                            <ul class="list-unstyled ml-3">
+                                <li>• Guayaquil</li>
+                                <li>• Milagro</li>
+                                <li>• Daule</li>
+                                <li>• Samborondón</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-3">
+                            <h6><i class="fas fa-mountain text-success"></i> Azuay</h6>
+                            <ul class="list-unstyled ml-3">
+                                <li>• Cuenca</li>
+                                <li>• Gualaceo</li>
+                                <li>• Paute</li>
+                                <li>• Girón</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-3">
+                            <h6><i class="fas fa-water text-primary"></i> Manabí</h6>
+                            <ul class="list-unstyled ml-3">
+                                <li>• Portoviejo</li>
+                                <li>• Manta</li>
+                                <li>• Chone</li>
+                                <li>• Jipijapa</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h6><i class="fas fa-river text-info"></i> Los Ríos</h6>
+                            <ul class="list-unstyled ml-3">
+                                <li>• Babahoyo</li>
+                                <li>• Quevedo</li>
+                                <li>• Ventanas</li>
+                                <li>• Vinces</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-3">
+                            <h6><i class="fas fa-gem text-warning"></i> El Oro</h6>
+                            <ul class="list-unstyled ml-3">
+                                <li>• Machala</li>
+                                <li>• Pasaje</li>
+                                <li>• Santa Rosa</li>
+                                <li>• Arenillas</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-3">
+                            <h6><i class="fas fa-tree text-success"></i> Loja</h6>
+                            <ul class="list-unstyled ml-3">
+                                <li>• Loja</li>
+                                <li>• Catamayo</li>
+                                <li>• Cariamanga</li>
+                                <li>• Macará</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-3">
+                            <h6><i class="fas fa-volcano text-danger"></i> Tungurahua</h6>
+                            <ul class="list-unstyled ml-3">
+                                <li>• Ambato</li>
+                                <li>• Baños</li>
+                                <li>• Pelileo</li>
+                                <li>• Píllaro</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-lake text-primary"></i> Imbabura</h6>
+                            <ul class="list-unstyled ml-3">
+                                <li>• Ibarra</li>
+                                <li>• Otavalo</li>
+                                <li>• Cotacachi</li>
+                                <li>• Atuntaqui</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-mountain text-info"></i> Cotopaxi</h6>
+                            <ul class="list-unstyled ml-3">
+                                <li>• Latacunga</li>
+                                <li>• La Maná</li>
+                                <li>• Saquisilí</li>
+                                <li>• Pujilí</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('home.home') }}" class="btn btn-primary">
+                        <i class="fas fa-calculator"></i> Calcular Ruta
+                    </a>
+                    <a href="{{ url_for('user.history') }}" class="btn btn-info">
+                        <i class="fas fa-history"></i> Mi Historial
+                    </a>
+                    <a href="/debug" class="btn btn-secondary">
+                        <i class="fas fa-bug"></i> Debug
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+{% block title %}Inicio - Sistema de Rutas del Ecuador{% endblock %}
+{% block page_title %}Sistema de Rutas del Ecuador{% endblock %}
+{% block breadcrumb %}Inicio{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    
+    <!-- Mensajes Flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{% if category == 'error' %}danger{% elif category == 'success' %}success{% else %}info{% endif %} alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% if show_registration %}
+    <!-- Formulario de Registro de Usuario -->
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card card-primary">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-user-plus mr-2"></i>
+                        Registro de Usuario
+                    </h3>
+                </div>
+                <form method="POST" action="{{ url_for('home.register_user') }}">
+                    <div class="card-body">
+                        <p class="text-center">Bienvenido al Sistema de Rutas del Ecuador</p>
+                        <p class="text-center text-muted">Para comenzar, ingrese su nombre</p>
+                        
+                        <div class="form-group">
+                            <label for="username" class="form-label">Nombre de Usuario</label>
+                            <input type="text" 
+                                    class="form-control" 
+                                    id="username" 
+                                    name="username" 
+                                    placeholder="Ingrese su nombre"
+                                    required
+                                    minlength="3">
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-user-plus mr-2"></i>
+                            Registrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Información del Sistema -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="info-box">
+                <span class="info-box-icon bg-info"><i class="fas fa-map-marked-alt"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Provincias</span>
+                    <span class="info-box-number">10</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="info-box">
+                <span class="info-box-icon bg-success"><i class="fas fa-city"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Ciudades</span>
+                    <span class="info-box-number">40+</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="info-box">
+                <span class="info-box-icon bg-warning"><i class="fas fa-route"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Algoritmo</span>
+                    <span class="info-box-number">Dijkstra</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- Calculadora de Rutas -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card card-success">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-route mr-2"></i>
+                        Calculadora de Rutas
+                    </h3>
+                    <div class="card-tools">
+                        <span class="badge badge-light">Usuario: {{ username }}</span>
+                        <a href="{{ url_for('home.logout') }}" class="btn btn-tool btn-sm">
+                            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                        </a>
+                    </div>
+                </div>
+                <form method="POST" action="{{ url_for('home.calculate_route') }}" id="routeForm">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-play text-success"></i> Origen</h5>
+                                <div class="form-group">
+                                    <label for="start_province" class="form-label">Provincia de Origen</label>
+                                    <select name="start_province" id="start_province" class="form-control" required>
+                                        <option value="">Seleccione una provincia</option>
+                                        {% for province in ['Pichincha', 'Guayas', 'Azuay', 'Manabí', 'Los Ríos', 'El Oro', 'Loja', 'Tungurahua', 'Imbabura', 'Cotopaxi'] %}
+                                            <option value="{{ province }}">{{ province }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="start_city" class="form-label">Ciudad de Origen</label>
+                                    <select name="start_city" id="start_city" class="form-control" required>
+                                        <option value="">Seleccione una ciudad</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-stop text-danger"></i> Destino</h5>
+                                <div class="form-group">
+                                    <label for="end_province" class="form-label">Provincia de Destino</label>
+                                    <select name="end_province" id="end_province" class="form-control" required>
+                                        <option value="">Seleccione una provincia</option>
+                                        {% for province in ['Pichincha', 'Guayas', 'Azuay', 'Manabí', 'Los Ríos', 'El Oro', 'Loja', 'Tungurahua', 'Imbabura', 'Cotopaxi'] %}
+                                            <option value="{{ province }}">{{ province }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="end_city" class="form-label">Ciudad de Destino</label>
+                                    <select name="end_city" id="end_city" class="form-control" required>
+                                        <option value="">Seleccione una ciudad</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-route"></i> Calcular Ruta
+                        </button>
+                        <a href="{{ url_for('user.history') }}" class="btn btn-info btn-lg">
+                            <i class="fas fa-history"></i> Ver Historial
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Estadísticas -->
+        <div class="col-md-4">
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-bar mr-2"></i>
+                        Estadísticas del Sistema
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="info-box">
+                        <span class="info-box-icon bg-info"><i class="fas fa-search"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Total Consultas</span>
+                            <span class="info-box-number">{{ stats.total_queries }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <span class="info-box-icon bg-success"><i class="fas fa-road"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Distancia Promedio</span>
+                            <span class="info-box-number">{{ stats.average_distance }} km</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <span class="info-box-icon bg-warning"><i class="fas fa-map-marker-alt"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Origen Popular</span>
+                            <span class="info-box-number" style="font-size: 14px;">{{ stats.most_popular_start }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <span class="info-box-icon bg-danger"><i class="fas fa-flag-checkered"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Destino Popular</span>
+                            <span class="info-box-number" style="font-size: 14px;">{{ stats.most_popular_end }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('user.statistics') }}" class="btn btn-info btn-block">
+                        Ver Estadísticas Completas
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- JavaScript para cargar ciudades dinámicamente -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const startProvince = document.getElementById('start_province');
+    const startCity = document.getElementById('start_city');
+    const endProvince = document.getElementById('end_province');
+    const endCity = document.getElementById('end_city');
+    
+    function loadCities(provinceSelect, citySelect) {
+        provinceSelect.addEventListener('change', function() {
+            const province = this.value;
+            if (province) {
+                fetch(`/get_cities/${province}`)
+                    .then(response => response.json())
+                    .then(cities => {
+                        citySelect.innerHTML = '<option value="">Seleccione una ciudad</option>';
+                        cities.forEach(city => {
+                            citySelect.innerHTML += `<option value="${city}">${city}</option>`;
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading cities:', error);
+                    });
+            } else {
+                citySelect.innerHTML = '<option value="">Seleccione una ciudad</option>';
+            }
+        });
+    }
+    
+    if (startProvince && startCity) {
+        loadCities(startProvince, startCity);
+    }
+    
+    if (endProvince && endCity) {
+        loadCities(endProvince, endCity);
+    }
+});
+</script>
+{% endblock %}

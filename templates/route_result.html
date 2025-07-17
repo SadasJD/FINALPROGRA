@@ -1,0 +1,327 @@
+{% extends 'base.html' %}
+{% block title %}Resultado de Ruta - Sistema de Rutas del Ecuador{% endblock %}
+{% block page_title %}Resultado de la Ruta{% endblock %}
+{% block breadcrumb %}Resultado{% endblock %}
+
+<!-- Agregar Vis.js para visualización de grafos -->
+{% block extra_head %}
+<script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+<style type="text/css">
+    #graph-container {
+        width: 100%;
+        height: 400px;
+        border: 1px solid lightgray;
+        border-radius: 5px;
+        background-color: #fafafa;
+    }
+    .graph-legend {
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        border: 1px solid #dee2e6;
+    }
+    .legend-item {
+        display: inline-block;
+        margin-right: 20px;
+        margin-bottom: 5px;
+    }
+    .legend-color {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        margin-right: 5px;
+        vertical-align: middle;
+    }
+    .loading-spinner {
+        text-align: center;
+        padding: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Visualización del Grafo -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="card card-primary">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-project-diagram mr-2"></i>
+                        Visualización del Grafo - Algoritmo de Dijkstra
+                    </h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="loading-spinner" id="graph-loading">
+                        <i class="fas fa-spinner fa-spin"></i> Cargando visualización del grafo...
+                    </div>
+                    <div id="graph-container" style="display: none;"></div>
+                    <div class="graph-legend">
+                        <h6><i class="fas fa-info-circle"></i> Leyenda del Grafo:</h6>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: #FF6B6B;"></span>
+                            <span>Ciudades en la ruta calculada</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: #97C2FC;"></span>
+                            <span>Otras ciudades del Ecuador</span>
+                        </div>
+                        <div class="legend-item">
+                            <span style="display: inline-block; width: 25px; height: 4px; background-color: #FF6B6B; margin-right: 5px; vertical-align: middle;"></span>
+                            <span>Conexiones de la ruta óptima</span>
+                        </div>
+                        <div class="legend-item">
+                            <span style="display: inline-block; width: 25px; height: 2px; background-color: #848484; margin-right: 5px; vertical-align: middle;"></span>
+                            <span>Otras conexiones disponibles</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card card-success">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-route mr-2"></i>
+                        Ruta Calculada: {{ start_city }} → {{ end_city }}
+                    </h3>
+                    <div class="card-tools">
+                        <span class="badge badge-success">{{ distance }} km</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-map-marked-alt text-info"></i> Ruta Completa</h5>
+                            <div class="timeline">
+                                {% for city in path %}
+                                    <div class="time-label">
+                                        <span class="bg-{% if loop.first %}success{% elif loop.last %}danger{% else %}info{% endif %}">
+                                            {% if loop.first %}
+                                                <i class="fas fa-play"></i> Origen
+                                            {% elif loop.last %}
+                                                <i class="fas fa-flag-checkered"></i> Destino
+                                            {% else %}
+                                                <i class="fas fa-map-marker-alt"></i> Parada {{ loop.index - 1 }}
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-city bg-{% if loop.first %}success{% elif loop.last %}danger{% else %}info{% endif %}"></i>
+                                        <div class="timeline-item">
+                                            <h3 class="timeline-header">{{ city }}</h3>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-road text-warning"></i> Detalles del Recorrido</h5>
+                            {% if route_details %}
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Tramo</th>
+                                                <th>Desde</th>
+                                                <th>Hasta</th>
+                                                <th>Distancia</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for detail in route_details %}
+                                            <tr>
+                                                <td>{{ loop.index }}</td>
+                                                <td>{{ detail.from_city }}</td>
+                                                <td>{{ detail.to_city }}</td>
+                                                <td>{{ detail.distance }} km</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Información:</strong> Ruta directa entre las ciudades seleccionadas.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('home.home') }}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left"></i> Nueva Consulta
+                    </a>
+                    <a href="{{ url_for('user.history') }}" class="btn btn-info">
+                        <i class="fas fa-history"></i> Ver Historial
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Información y Estadísticas -->
+        <div class="col-md-4">
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Información de la Ruta
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="info-box">
+                        <span class="info-box-icon bg-success"><i class="fas fa-play"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Ciudad de Origen</span>
+                            <span class="info-box-number" style="font-size: 16px;">{{ start_city }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <span class="info-box-icon bg-danger"><i class="fas fa-flag-checkered"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Ciudad de Destino</span>
+                            <span class="info-box-number" style="font-size: 16px;">{{ end_city }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <span class="info-box-icon bg-warning"><i class="fas fa-road"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Distancia Total</span>
+                            <span class="info-box-number">{{ distance }} km</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <span class="info-box-icon bg-info"><i class="fas fa-map-marker-alt"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Ciudades en Ruta</span>
+                            <span class="info-box-number">{{ path|length }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card card-warning">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-lightbulb mr-2"></i>
+                        Información del Algoritmo
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>Algoritmo utilizado:</strong> Dijkstra</p>
+                    <p><strong>Tipo de ruta:</strong> Más corta en distancia</p>
+                    <p><strong>Fecha:</strong> {{ current_date }}</p>
+                    <p><strong>Usuario:</strong> {{ username }}</p>
+                    <p class="text-muted">
+                        <small>
+                            El algoritmo de Dijkstra garantiza encontrar la ruta más corta 
+                            entre dos puntos en el grafo. Las distancias están basadas en 
+                            conexiones terrestres principales entre las ciudades del Ecuador.
+                        </small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript para visualización del grafo -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Cargar datos del grafo con la ruta específica
+    fetch(`/get_route_graph/{{ start_city }}/{{ end_city }}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('graph-loading').innerHTML = 
+                    '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Error cargando grafo: ' + data.error + '</div>';
+                return;
+            }
+            
+            // Ocultar spinner y mostrar contenedor
+            document.getElementById('graph-loading').style.display = 'none';
+            document.getElementById('graph-container').style.display = 'block';
+            
+            // Configurar datasets para Vis.js
+            var nodes = new vis.DataSet(data.nodes);
+            var edges = new vis.DataSet(data.edges);
+            
+            var container = document.getElementById('graph-container');
+            var graphData = {
+                nodes: nodes,
+                edges: edges
+            };
+            
+            var options = {
+                nodes: {
+                    shape: 'dot',
+                    size: 20,
+                    font: {
+                        size: 12,
+                        color: '#000000'
+                    },
+                    borderWidth: 2,
+                    shadow: true
+                },
+                edges: {
+                    font: {
+                        size: 10,
+                        color: '#333333'
+                    },
+                    widthConstraint: {
+                        maximum: 100
+                    },
+                    smooth: {
+                        type: 'continuous'
+                    }
+                },
+                physics: {
+                    stabilization: false,
+                    barnesHut: {
+                        gravitationalConstant: -8000,
+                        springConstant: 0.001,
+                        springLength: 200
+                    }
+                },
+                interaction: {
+                    dragNodes: true,
+                    dragView: true,
+                    zoomView: true
+                }
+            };
+            
+            // Crear y renderizar el grafo
+            var network = new vis.Network(container, graphData, options);
+            
+            // Evento para mostrar información al hacer click en nodos
+            network.on("click", function (params) {
+                if (params.nodes.length > 0) {
+                    var nodeId = params.nodes[0];
+                    alert('Ciudad: ' + nodeId);
+                }
+            });
+            
+        })
+        .catch(error => {
+            console.error('Error cargando datos del grafo:', error);
+            document.getElementById('graph-loading').innerHTML = 
+                '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Error de conexión al cargar el grafo</div>';
+        });
+});
+</script>
+{% endblock %}
